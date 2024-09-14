@@ -120,15 +120,15 @@ func (l *Lexer) Lex() (Token, string) {
 	return UNKNOWN, sch
 }
 
-func (s *Lexer) lexDigit() (Token, string) {
+func (l *Lexer) lexDigit() (Token, string) {
 	var buf bytes.Buffer
-	buf.WriteRune(s.read())
+	buf.WriteRune(l.read())
 
 	for {
-		if ch := s.read(); ch == eof {
+		if ch := l.read(); ch == eof {
 			break
 		} else if !isDigit(ch) {
-			s.unread()
+			l.unread()
 			break
 		} else {
 			buf.WriteRune(ch)
@@ -138,15 +138,15 @@ func (s *Lexer) lexDigit() (Token, string) {
 	return DIGIT, buf.String()
 }
 
-func (s *Lexer) lexIdent() (Token, string) {
+func (l *Lexer) lexIdent() (Token, string) {
 	var buf bytes.Buffer
-	buf.WriteRune(s.read())
+	buf.WriteRune(l.read())
 
 	for {
-		if ch := s.read(); ch == eof {
+		if ch := l.read(); ch == eof {
 			break
-		} else if !isLetter(ch) {
-			s.unread()
+		} else if !isLetter(ch) && !isDigit(ch) {
+			l.unread()
 			break
 		} else {
 			buf.WriteRune(ch)
@@ -159,15 +159,15 @@ func (s *Lexer) lexIdent() (Token, string) {
 	return t, ident
 }
 
-func (s *Lexer) lexWhiteSpace() (Token, string) {
+func (l *Lexer) lexWhiteSpace() (Token, string) {
 	var buf bytes.Buffer
-	buf.WriteRune(s.read())
+	buf.WriteRune(l.read())
 
 	for {
-		if ch := s.read(); ch == eof {
+		if ch := l.read(); ch == eof {
 			break
 		} else if !isWhitespace(ch) {
-			s.unread()
+			l.unread()
 			break
 		} else {
 			buf.WriteRune(ch)
