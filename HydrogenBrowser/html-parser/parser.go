@@ -97,9 +97,12 @@ func (p *Parser) scanIgnoreWhitespace() (Token, string) {
 
 func (p *Parser) unscan() { p.size = 1 }
 
-// TODO: Doing -> Can't parse without root HTML tag
 func (p *Parser) Parse() *Node {
 	t, lit := p.scanIgnoreWhitespace()
+
+	if t == EOF {
+		return nil
+	}
 
 	if t == LT_SIGN {
 		node := &Node{Attributes: make(map[string]string)}
@@ -217,18 +220,23 @@ func (p *Parser) parseAttr() (string, string) {
 
 // This parser does not support the whole HTML spec!
 // just the provided HTML on the jam
-func ParseHTML(filePath string) (*[]Node, error) {
+func ParseHTML(filePath string) ([]*Node, error) {
 	htmlFile, err := os.Open(filePath)
 	if err != nil {
 		return nil, err
 	}
 	defer htmlFile.Close()
 
+	nodes := []*Node{}
 	parser := NewParser(htmlFile)
 
-	node := parser.Parse()
-	fmt.Println(node)
+	for {
+		node := parser.Parse()
+		if node == nil {
+			break
+		}
+		nodes = append(nodes, node)
+	}
 
-	// TODO: Return slice of nodes (maybe fixes the parsing without root HTML?)
-	return nil, nil
+	return nodes, nil
 }
