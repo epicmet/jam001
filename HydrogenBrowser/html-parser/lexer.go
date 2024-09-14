@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	"io"
-	"strings"
 )
 
 const (
@@ -23,26 +22,15 @@ const (
 	EQUAL_SIGN    // =
 	DOUBLE_QUOTE  // "
 	SINGLE_QUOTE  // '
-	OPENING_TAG   // <
-	CLOSING_TAG   // >
+	LT_SIGN       // <
+	GT_SIGN       // >
+	CLOSING_TAG   // </
 	OPENING_PAR   // (
 	CLOSING_PAR   // )
 
 	// Literals
 	IDENT
 	DIGIT
-
-	// Known Tags
-	HEADER
-	BODY
-	TITLE
-	HEADING1
-	NEXTID
-	ANCHOR
-	PARAGRAPH
-	DL
-	DT
-	DD
 )
 
 type Token int
@@ -102,9 +90,15 @@ func (l *Lexer) Lex() (Token, string) {
 	case '/':
 		return SLASH, sch
 	case '<':
-		return OPENING_TAG, sch
+		nch := l.read()
+		if nch == '/' {
+			return CLOSING_TAG, sch + string(nch)
+		} else {
+			l.unread()
+			return LT_SIGN, sch
+		}
 	case '>':
-		return CLOSING_TAG, sch
+		return GT_SIGN, sch
 	case '=':
 		return EQUAL_SIGN, sch
 	case '"':
@@ -161,29 +155,6 @@ func (s *Lexer) lexIdent() (Token, string) {
 
 	ident := buf.String()
 	t := IDENT
-
-	switch strings.ToLower(ident) {
-	case "header":
-		t = HEADER
-	case "body":
-		t = BODY
-	case "title":
-		t = TITLE
-	case "h1":
-		t = HEADING1
-	case "nextid":
-		t = NEXTID
-	case "a":
-		t = ANCHOR
-	case "p":
-		t = PARAGRAPH
-	case "dl":
-		t = DL
-	case "dt":
-		t = DT
-	case "dd":
-		t = DD
-	}
 
 	return t, ident
 }
